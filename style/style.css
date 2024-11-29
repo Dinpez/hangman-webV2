@@ -1,0 +1,30 @@
+body {
+    font-family: Arial, sans-serif;
+    text-align: center;
+    background-color: rgb(49, 51, 56);
+    color: whitesmoke;
+    padding: 20px;
+}
+
+h1 {
+    color: #5a9;
+}
+
+
+.word-reveal {
+    font-size: 20px;
+    margin: 20px 0;
+}
+
+button {
+    padding: 10px 20px;
+    background: #5a9;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+}
+
+button:hover {
+    background: #478;
+}

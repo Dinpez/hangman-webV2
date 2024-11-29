@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Jeu du Pendu</title>
+    <link rel="stylesheet" href="./style/style.css">
+</head>
+<body>
+    <h1>Jeu du Pendu</h1>
+    <p>Mot à deviner : {{.EtatMot}}</p>
+    <p>Tentatives restantes : {{.TentativesRestantes}}</p>
+
+    <div> 
+    <img src="image_pendu/pendu{{.Etape}}.png" alt="État actuel du pendu">
+    </div>
+
+    {{if .Perdu}}
+        <p>Vous avez perdu ! Le mot était : <strong>{{.Mot}}</strong></p>
+    {{else if .Gagne}}
+        <p>Félicitations ! Vous avez gagné ! Le mot était : <strong>{{.Mot}}</strong></p>
+    {{else}}
+        <p>{{.Message}}</p>
+        <form method="POST" action="/">
+            <label for="lettre">Devinez une lettre :</label>
+            <input type="text" name="lettre" id="lettre" maxlength="1" required>
+            <button type="submit">Deviner</button>
+        </form>
+    {{end}}
+
+    <p>Lettres essayées : 
+        {{if .LettresEssayees}}
+            {{.LettresEssayees}}
+        {{else}}
+            Aucune pour le moment.
+        {{end}}
+    </p>
+</body>
+</html>
