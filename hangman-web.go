@@ -181,6 +181,27 @@ func afficherMotRevele(revealedWord []rune) string {
 	return strings.Join(strings.Split(string(revealedWord), ""), " ")
 }
 
+func startPageHandler(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		username := r.FormValue("username")
+		http.SetCookie(w, &http.Cookie{
+			Name:  "username",
+			Value: username,
+			Path:  "/",
+		})
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	tmpl, err := template.ParseFiles("template/start.tmpl")
+	if err != nil {
+		http.Error(w, "Erreur lors du chargement du template HTML", http.StatusInternalServerError)
+		return
+	}
+
+	tmpl.Execute(w, nil)
+}
+
 func main() {
 	http.HandleFunc("/", gameHandler)
 	http.Handle("/style/", http.StripPrefix("/style/", http.FileServer(http.Dir("style"))))
