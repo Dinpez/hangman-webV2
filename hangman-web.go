@@ -164,6 +164,10 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Erreur lors du chargement du template HTML", http.StatusInternalServerError)
 		return
 	}
+	if lose {
+		http.Redirect(w, r, "/gameover", http.StatusSeeOther)
+		return
+	}
 
 	data := map[string]interface{}{
 		"EtatMot":             afficherMotRevele(game.RevealedWord),
@@ -193,7 +197,7 @@ func newGameLoose(w http.ResponseWriter, r *http.Request) {
 		mutex.Lock()
 		games[sessionID] = nouvellePartie()
 		mutex.Unlock()
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.Redirect(w, r, "/jeu", http.StatusSeeOther)
 		return
 	}
 
@@ -217,7 +221,7 @@ func startPageHandler(w http.ResponseWriter, r *http.Request) {
 			Value: username,
 			Path:  "/",
 		})
-		http.Redirect(w, r, "/", http.StatusSeeOther)
+		http.Redirect(w, r, "/jeu", http.StatusSeeOther)
 		return
 	}
 
@@ -231,12 +235,11 @@ func startPageHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
-	http.HandleFunc("/", gameHandler)
+	http.HandleFunc("/jeu", gameHandler)
 	http.Handle("/style/", http.StripPrefix("/style/", http.FileServer(http.Dir("style"))))
 	http.Handle("/image_pendu/", http.StripPrefix("/image_pendu/", http.FileServer(http.Dir("image_pendu"))))
-	http.HandleFunc("/start", startPageHandler)
-	if err := http.Redirect(w, r, "/", http.StatusSeeOther); err != nil {
-	fmt.Println("Erreur lors de la redirection :", err)
+	http.HandleFunc("/", startPageHandler)
+	http.HandleFunc("/gameover", newGameLoose)
 	fmt.Println("Le serveur est en cours d'exécution sur http://localhost:8080")
 	http.ListenAndServe(":8080", nil)
 }
