@@ -84,7 +84,11 @@ func revelerLettres(word string, n int) []rune {
 func getGame(r *http.Request) *Game {
 	mutex.Lock()
 	defer mutex.Unlock()
-
+	username := "Joueur"
+	if cookie, err := r.Cookie("username"); err == nil {
+		username = cookie.Value
+	}
+	game.Message = "Bienvenue, " + username + " !"
 	sessionID := "default"
 	if cookie, err := r.Cookie("game-session"); err == nil {
 		sessionID = cookie.Value
