@@ -180,6 +180,30 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 func afficherMotRevele(revealedWord []rune) string {
 	return strings.Join(strings.Split(string(revealedWord), ""), " ")
 }
+func newGameLoose(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		sessionID := "default"
+		if cookie, err := r.Cookie("game-session"); err == nil {
+			sessionID = cookie.Value
+		}
+		mutex.Lock()
+		games[sessionID] = nouvellePartie()
+		mutex.Unlock()
+		http.Redirect(w, r, "/", http.StatusSeeOther)
+		return
+	}
+
+	tmpl, err := template.ParseFiles("template/gameover.tmpl")
+	if err != nil {
+		http.Error(w, "Erreur lors du chargement du template HTML", http.StatusInternalServerError)
+		return
+	}
+
+	data := map[string]interface{}{
+		"Mot": "Le mot était : " + getGame(r).Word,
+	}
+	tmpl.Execute(w, data)
+}
 
 func startPageHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
