@@ -21,11 +21,12 @@
         <p>Félicitations ! Vous avez gagné ! Le mot était : <strong>{{.Mot}}</strong></p>
     {{else}}
         <p>{{.Message}}</p>
-        <form method="POST" action="/">
+        <form method="POST" action="/jeu">
             <label for="lettre">Devinez une lettre :</label>
             <input type="text" name="lettre" id="lettre" maxlength="1" required>
             <button type="submit">Deviner</button>
         </form>
+        <button type="submit">Recommencer</button>
     {{end}}
 
     <p>Lettres essayées : 
