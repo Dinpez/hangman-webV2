@@ -206,6 +206,9 @@ func main() {
 	http.HandleFunc("/", gameHandler)
 	http.Handle("/style/", http.StripPrefix("/style/", http.FileServer(http.Dir("style"))))
 	http.Handle("/image_pendu/", http.StripPrefix("/image_pendu/", http.FileServer(http.Dir("image_pendu"))))
+	http.HandleFunc("/start", startPageHandler)
+	http.HandleFunc("/", gameHandler)
+	http.Handle("/style/", http.StripPrefix("/style/", http.FileServer(http.Dir("style"))))
 	fmt.Println("Le serveur est en cours d'exécution sur http://localhost:8080")
 	http.ListenAndServe(":8080", nil)
 }
