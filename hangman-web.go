@@ -93,6 +93,7 @@ func getGame(r *http.Request) *Game {
 	if game, exists := games[sessionID]; exists {
 		return game
 	}
+
 	newGame := nouvellePartie()
 	username := "Joueur"
 	if cookie, err := r.Cookie("username"); err == nil {
@@ -121,10 +122,22 @@ func calculerEtape(tentativesRestantes int, maxTentatives int) int {
 }
 
 func gameHandler(w http.ResponseWriter, r *http.Request) {
-	game := getGame(r)
-	game.Message = ""
-
 	if r.Method == http.MethodPost {
+		// Vérifie si l'action est "restart"
+		if r.FormValue("action") == "restart" {
+			sessionID := "default"
+			if cookie, err := r.Cookie("game-session"); err == nil {
+				sessionID = cookie.Value
+			}
+			mutex.Lock()
+			games[sessionID] = nouvellePartie()
+			mutex.Unlock()
+			http.Redirect(w, r, "/jeu", http.StatusSeeOther) // Recharge la page
+			return
+		}
+
+		// Traitement standard pour une lettre
+		game := getGame(r)
 		letter := r.FormValue("lettre")
 		if len(letter) == 1 {
 			letterRune := rune(letter[0])
@@ -149,6 +162,8 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	// Affichage de la page
+	game := getGame(r)
 	lettersTried := []string{}
 	for letter := range game.UsedLetters {
 		lettersTried = append(lettersTried, string(letter))
@@ -166,10 +181,6 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Erreur lors du chargement du template HTML", http.StatusInternalServerError)
 		return
 	}
-	if lose {
-		http.Redirect(w, r, "/gameover", http.StatusSeeOther)
-		return
-	}
 
 	data := map[string]interface{}{
 		"EtatMot":             afficherMotRevele(game.RevealedWord),
@@ -184,7 +195,6 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 
 	saveGame(w, r, game)
 	tmpl.Execute(w, data)
-
 }
 
 func afficherMotRevele(revealedWord []rune) string {
@@ -203,6 +213,12 @@ func newGameLoose(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	game := getGame(r)
+	mot := "Inconnu"
+	if game != nil {
+		mot = game.Word
+	}
+
 	tmpl, err := template.ParseFiles("template/gameover.tmpl")
 	if err != nil {
 		http.Error(w, "Erreur lors du chargement du template HTML", http.StatusInternalServerError)
@@ -210,7 +226,7 @@ func newGameLoose(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := map[string]interface{}{
-		"Mot": "Le mot était : " + getGame(r).Word,
+		"Mot": "Le mot était : " + mot,
 	}
 	tmpl.Execute(w, data)
 }

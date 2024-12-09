@@ -26,7 +26,11 @@
             <input type="text" name="lettre" id="lettre" maxlength="1" required>
             <button type="submit">Deviner</button>
         </form>
-        <button type="submit">Recommencer</button>
+        <form method="POST" action="/jeu">
+    <input type="hidden" name="action" value="restart">
+    <button type="submit">Recommencer</button>
+</form>
+
     {{end}}
 
     <p>Lettres essayées : 
