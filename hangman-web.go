@@ -123,7 +123,7 @@ func calculerEtape(tentativesRestantes int, maxTentatives int) int {
 
 func gameHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
-		// Vérifie si l'action est "restart"
+
 		if r.FormValue("action") == "restart" {
 			sessionID := "default"
 			if cookie, err := r.Cookie("game-session"); err == nil {
@@ -132,11 +132,10 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 			mutex.Lock()
 			games[sessionID] = nouvellePartie()
 			mutex.Unlock()
-			http.Redirect(w, r, "/jeu", http.StatusSeeOther) // Recharge la page
+			http.Redirect(w, r, "/jeu", http.StatusSeeOther)
 			return
 		}
 
-		// Traitement standard pour une lettre
 		game := getGame(r)
 		letter := r.FormValue("lettre")
 		if len(letter) == 1 {
@@ -162,7 +161,6 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Affichage de la page
 	game := getGame(r)
 	lettersTried := []string{}
 	for letter := range game.UsedLetters {
@@ -179,6 +177,10 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 	tmpl, err := template.ParseFiles("template/hangman.tmpl")
 	if err != nil {
 		http.Error(w, "Erreur lors du chargement du template HTML", http.StatusInternalServerError)
+		return
+	}
+	if lose {
+		http.Redirect(w, r, "/gameover", http.StatusSeeOther)
 		return
 	}
 
