@@ -183,9 +183,7 @@ func afficherMotRevele(revealedWord []rune) string {
 
 func main() {
 	http.HandleFunc("/", gameHandler)
-	http.HandleFunc("/hangman", gameHandler)
 	http.Handle("/style/", http.StripPrefix("/style/", http.FileServer(http.Dir("style"))))
-	http.HandleFunc("/", gameHandler)
 
 	fmt.Println("Le serveur est en cours d'exécution sur http://localhost:8080")
 	http.ListenAndServe(":8080", nil)
