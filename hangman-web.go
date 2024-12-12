@@ -183,6 +183,10 @@ func gameHandler(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/gameover", http.StatusSeeOther)
 		return
 	}
+	if win {
+		http.Redirect(w, r, "/win", http.StatusSeeOther)
+		return
+	}
 
 	data := map[string]interface{}{
 		"EtatMot":             afficherMotRevele(game.RevealedWord),
@@ -232,6 +236,31 @@ func newGameLoose(w http.ResponseWriter, r *http.Request) {
 	}
 	tmpl.Execute(w, data)
 }
+func newGameWin(w http.ResponseWriter, r *http.Request) {
+	if r.Method == http.MethodPost {
+		sessionID := "default"
+		if cookie, err := r.Cookie("game-session"); err == nil {
+			sessionID = cookie.Value
+		}
+		mutex.Lock()
+		games[sessionID] = nouvellePartie()
+		mutex.Unlock()
+		http.Redirect(w, r, "/jeu", http.StatusSeeOther)
+		return
+	}
+
+	tmpl, err := template.ParseFiles("template/win.tmpl")
+	if err != nil {
+		http.Error(w, "Erreur lors du chargement du template HTML", http.StatusInternalServerError)
+		return
+	}
+
+	data := map[string]interface{}{
+		"Message": "Félicitations, vous avez gagné !",
+	}
+
+	tmpl.Execute(w, data)
+}
 
 func startPageHandler(w http.ResponseWriter, r *http.Request) {
 	if r.Method == http.MethodPost {
@@ -255,6 +284,7 @@ func startPageHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	http.HandleFunc("/win", newGameWin)
 	http.HandleFunc("/jeu", gameHandler)
 	http.Handle("/style/", http.StripPrefix("/style/", http.FileServer(http.Dir("style"))))
 	http.Handle("/image_pendu/", http.StripPrefix("/image_pendu/", http.FileServer(http.Dir("image_pendu"))))
